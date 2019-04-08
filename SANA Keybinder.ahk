@@ -68,7 +68,7 @@ return
 
 ; Prints InGame key help as chatlog
 :?:/keyhelp::
-	SendMultipleLines(Array("Alt+e - Liste mit Events.", "/frc - Alle Fahrzeuge werden respawnt.", "/nadn - Werbung für SANA, um neue Mitglieder zu bekommen.", "F12 - Keybinder aktivieren/deaktivieren."), true)
+	SendMultipleLines(Array("Alt+e - Liste mit Events.", "Alt+0 - Glückwunsch-Text bei Events.", "/frc - Alle Fahrzeuge werden respawnt.", "/nadn - Werbung für SANA, um neue Mitglieder zu bekommen.", "/naddon - Werbung für Spenden.", "/gr - Gruß-Runde wird eingeleitet.", "/gre - Gruß-Runde wird beendet.", "/thx - Bedanken für die Teilnahme.", "/winners - Aufforderung alle Gewinner zur SANA-Base zu kommen.", "/countdown - Ein Countdown wird gestartet.", "F12 - Keybinder aktivieren/deaktivieren."), true)
 return
 
 ; Keybinds
@@ -98,18 +98,6 @@ return
 	
 	OnDialogResponse(false)
 return
-
-SetEventName(eventName)
-{
-	ev = new Event()
-	this.ev.EventName := eventName
-	return this.ev.EventName
-}
-
-GetEventName()
-{
-	return this.ev.EventName
-}
 
 OnDialogResponse(response)
 {
@@ -270,9 +258,54 @@ CheckRounds(rounds)
 	SendChat("/fc >> Respawn der Fahrzeuge wurde erfolgreich durchgeführt. <<")
 return
 
+; Countdown
+:?:/countdown::
+	counter := 5
+	SendChat("/s >> ACHTUNG: COUNTDOWN <<")
+	Sleep, 1000
+	while (counter > 0)
+	{
+		SendChat("/s >> " counter " <<")
+		counter--
+		Sleep, 1000
+	}
+	SendChat("/s >> LOS <<")
+return
+
 ; Ad for new sana members
 :?:/nadn::
 	SendNewsMessage(Array("SA:NA Bewerbungsrunde [OPEN]", "Die San Andreas News Agency sucht motivierte Reporter!", "Du wolltest schon immer Berichte schreiben und kleinere Events leiten?", "Dann bewirb dich noch heute bei der SA:NA!"))
+return
+
+; Ad for donations
+:?:/naddon::
+	SendNewsMessage(Array("SA:NA - Spendenaktion", "Die San Andreas News Agency benötigt eure Spenden!", "Mit eurer Hilfe könnt ihr dazu beitragen, unsere Events aktiver und spannender zu gestalten.", "Jede eingegangene Spende wird im News-Chat erwähnt."))
+return
+
+; Start greet round
+:?:/gr::
+	SendNewsMessage(Array("SA:NA - Gruß-Box", "Ihr habt nun die Möglichkeit eure Freunde und Bekannten zu grüßen.", format("Sendet mir hierfür eine Nachricht per SMS an die ID {0}!", GetPlayerId())))
+return
+
+; Stop greet round
+:?:/gre::
+	SendNewsMessage(Array("Vielen Dank für eure Teilnahme!", "SA:NA - Gruß-Box Ende"))
+return
+
+; Gratulation text
+#If !IsInChat()
+!0::
+	hgwText := "/news .:: Herzlichen Glückwunsch an{Space} ::."
+	SendInput t%hgwText%
+return
+
+; winners to SA:NA Base text
+:?:/winners::
+	SendNewsMessage("Ich bitte jeden Gewinner zur SA:NA Base zu kommen!")
+return
+
+:?:/thx::
+	SendNewsMessage("Vielen Dank für die Teilnahme!")
 return
 
 ; Automatic vehicle engine and light start
