@@ -1,0 +1,25 @@
+/news .:: SAN:NEWS Wortsalat ::.{Return}&&/news .:: 5 Runden ::.{Return}&&/news .:: Für jede richtige Lösung gibt es eine Gewinnsumme von 50.000$! ::.{Return}&&/news .:: Schick mir die richtige Antwort per SMS an die 348439 ::.{Return}
+
+/news .:: SAN:NEWS Quiz-Runde ::.{Return}&&/news .:: 5 Runden ::.&&/news .:: Für jede richtige Lösung gibt es eine Gewinnsumme von 50.000$! ::.{Return}&&/news .:: Schick mir die richtige Antwort per SMS an die 348439 ::.{Return}
+
+/news .:: SA:NA Bewerbungsrunde [OPEN] ::.{Return}&&/news .:: Die San Andreas News Agency sucht motivierte Reporter ::.{Return}&&/news ..: Du wolltest schon immer Berichte schreiben und kleinere Events leiten? ::.{Return}&&/news .:: Dann bewirb dich noch heute bei der SA:NA! ::.{Return}
+
+/news .:: SA:NA - Wie heißt die Frage?! ::.{Return}&&/news .:: ---------------------------------- ::.{Return}&&/news .:: Spielregeln ::.{Return}&&/news .:: Ihr bekommt pro Runde eine Antwort vorgegeben, zu der ihr die Frage finden sollt. ::.{Return}&&/news .:: Beispiel: Angela Merkel. ::.{Return}&&/news .:: Die Lösung wäre: Wie heißt unsere aktuelle Bundeskanzlerin? ::.{Return}&&/news .:: Spielregeln - Ende ::.{Return}&&/news .:: ---------------------------------- ::.{Return}&&/news .:: 5 Runden werden gespielt. ::.{Return}&&/news .:: Für jede richtige Lösung gibt es eine Gewinnsumme von 50.000$! ::.{Return}&&/news .:: Schick mir die richtige Antwort per SMS an die 348439 ::.{Return}
+
+/news .:: Herzlichen Glückwunsch an{Space} ::.
+
+/news .:: Die richtige Antwort ist{Space} ::.
+
+/news .:: Vielen Dank für die Teilnahme! ::.
+
+/news .:: Ich bitte jeden Gewinner zur SA:NA Base zu kommen! ::.
+
+/news .:: Wort Nummer X:  ::.
+
+/news .:: Frage Nummer X:  ::.
+
+/news .:: SAN:NEWS - Flaschenpost ::.
+/news .:: ---------------------------------- ::.{Return}&&/news .:: Spielregeln ::.{Return}&&/news .:: Ihr beginnt an einem beliebigen Ort und bekommt eine Frage gestellt. ::.{Return}&&/news .:: Sobald ihr die Lösung zu der Frage wisst, müsst ihr zum nächsten Reporter fahren und ihm die Antwort nennen. ::.{Return}
+/news .:: Daraufhin folgt vom nächsten Newsreporter eine Frage, die beim nächsten Reporter beantwortet werden muss. ::.{Return}&&/news .:: Drei Newsreporter sind in Los Santos verteilt. ::.{Return}&&/news .:: Spielregeln - Ende ::.{Return}&&/news .:: ---------------------------------- ::.{Return}
+/news .:: 5 Runden werden gespielt. ::.{Return}&&/news .:: Für jede richtige Lösung gibt es eine Gewinnsumme von 50.000$! ::.{Return}&&/news .:: Schick mir die richtige Antwort per SMS an die 348439 ::.{Return}
+/news .:: Die Gewinnsumme für das Event beträgt 200.000$! ::.{Return}

@@ -1,0 +1,166 @@
+﻿class Config
+{
+	__New()
+	{
+		
+	}
+	
+	SavePath {
+		get {
+			output = %A_MyDocuments%\SANA-Keybinder
+			return output
+		}
+	}
+	
+	KeybindsSavePath {
+		get {
+			return this.SavePath "\keybinds.ini"
+		}
+	}
+	
+	EventsSavePath {
+		get {
+			return this.SavePath "\events.ini"
+		}
+	}
+	
+	TempSavePath {
+		get {
+			return this.SavePath "\temp.ini"
+		}
+	}
+	
+	SaveEvents(eventArray)
+	{
+		savepath := this.SavePath
+		eventSavePath := this.EventsSavePath
+		eventName := eventArray["eventName"]
+		
+		; no dir exists? then create
+		if (!FileExist(savepath))
+			FileCreateDir, %savepath%
+		
+		For eventKey, eventValue in eventArray
+		{
+			if (eventKey != "eventName")
+				IniWrite, %eventValue%, %eventSavePath%, %eventName%, %eventKey%
+		}
+	}
+	
+	SaveKeybinds(keybindArray)
+	{
+		
+	}
+	
+	SaveTempEvent(key, value)
+	{
+		savepath := this.SavePath
+		eventTempSavePath := this.TempSavePath
+		keyValuePair := key . "=" . value
+		
+		; no dir exists? then create
+		if (!FileExist(savepath))
+			FileCreateDir, %savepath%
+		
+		; no temp file exists? create!
+		if (!FileExist(eventTempSavePath))
+			FileAppend, %keyValuePair%`n, %eventTempSavePath%
+		
+		Sleep, 400
+		
+		if (key != "eventName")
+			FileAppend, %keyValuePair%`n, %eventTempSavePath%
+	}
+	
+	ParseTempEvents(fileLines)
+	{
+		eventTempSavePath := this.TempSavePath
+		tempArray := this.CheckTempEventsLines()
+		eventArray := []
+		totalLines := tempArray.Count()
+		
+		;MsgBox, %totalLines%
+		
+		; enough lines available for event?
+		if (totalLines == fileLines)
+		{
+			For eventKey, eventVal in tempArray
+				eventArray[eventKey] := eventVal
+			
+			; delete temp file
+			FileDelete, %eventTempSavePath%
+		}
+		
+		return eventArray
+	}
+	
+	CheckTempEventsLines()
+	{
+		eventTempSavePath := this.TempSavePath
+		tempArray := []
+		
+		; check amount of lines
+		Loop, read, %eventTempSavePath%
+		{
+			FileReadLine, line, %eventTempSavePath%, %A_Index%
+			
+			; count lines
+			totalLines = %A_Index%
+			
+			lineSplit := StrSplit(line, "=")
+			key := lineSplit[1]
+			val := lineSplit[2]
+			
+			; save in temp array
+			tempArray[key] := val
+		}
+		
+		return tempArray
+	}
+	
+	/*
+	CanAppend(key)
+	{
+		question := "Frage"
+		answer := "Antwort"
+		eventTempSavePath := this.TempSavePath
+
+		Loop, read, %eventTempSavePath%
+		{
+			Loop, parse, A_LoopReadLine, %A_Tab%
+			{
+				inputValue = %A_LoopField%
+				
+				if ErrorLevel
+					break
+				
+				IfInString, inputValue, %question%
+					return false
+					
+				IfInString, inputValue, %answer%
+					return false
+			}
+		}
+
+/*
+		Loop
+		{
+			FileReadLine, line, %eventTempSavePath%, %A_Index%
+			
+			;MsgBox %line%
+			
+			if ErrorLevel
+				break
+			
+			IfInString, line, %question%
+				return false
+				
+			IfInString, line, %answer%
+				return false
+		}
+		
+		
+		return true
+	}
+	*/
+}
