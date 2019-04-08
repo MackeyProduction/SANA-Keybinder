@@ -8,6 +8,7 @@
 #Include inc\API.ahk
 #Include inc\Config.ahk
 #Include inc\Event.ahk
+;#Include inc\Test.ahk
 
 ; Initialisierung
 scriptActivated = true
@@ -15,27 +16,6 @@ meMessagesActivated = true
 dialogResponse = true
 automateVehicle = true
 minigameRounds = 5
-
-!a::
-	TestSaveEvents()
-Return
-
-TestSaveEvents()
-{
-	eventArray := []
-	eventArray["eventName"] := "Quiz-Runde"
-	eventArray["Frage"] := "foo;a;b;c;d"
-	eventArray["Antwort"] := "bar;c;d;e;f"
-	eventArray["Runden"] := "5"
-	Config.SaveTempEvent("eventName", eventArray["eventName"])
-	Config.SaveTempEvent("Frage", eventArray["Frage"])
-	Config.SaveTempEvent("Antwort", eventArray["Antwort"])
-	Config.SaveTempEvent("Runden", eventArray["Runden"])
-	
-	result := Config.ParseTempEvents(4)
-	
-	Config.SaveEvents(result)
-}
 
 /*
 t::
@@ -210,6 +190,15 @@ OnDialogResponse(response)
 			Case-3101:
 				goto Case-2103
 			return
+			
+			Case-4001:
+			Case-4002:
+				OpenDialog(0, "{FFFFFF}Soll das Event wirklich gestartet werden?`n`nMit der Taste {C1F10E}Alt+S{FFFFFF} wird die News-Nachricht abgesendet.`n`nDie festgelegten Fragen sind über {C1F10E}Numpad0-9{FFFFFF} und die Antworten`nüber {C1F10E}Alt+Numpad0-9{FFFFFF} reserviert.", 4100)
+			return
+			
+			Case-4100:
+				SetEventKeyBinds(GetDialogLines__()[index])
+			return
 					
 			Case-Default:
 				return
@@ -222,6 +211,39 @@ OnDialogResponse(response)
 !e::
 	OpenDialog(2, "Mini-Event`nSANA-Event", 1000)
 return
+
+; Show event list and start event
+#If !IsDialogOpen()
+!a::
+	eventSavePath := Config.EventsSavePath
+	IniRead, events, %eventSavePath%
+	
+	OpenDialog(2, events, 4000)
+return
+
+SetEventKeyBinds(eventSection)
+{
+	eventSavePath := Config.EventsSavePath
+	
+	; read events.ini
+	IniRead, questions, %eventSavePath%, %eventSection%, "Frage"
+	IniRead, answers, %eventSavePath%, %eventSection%, "Antwort"
+	IniRead, rounds, %eventSavePath%, %eventSection%, "Runden"
+	
+	splitQuestions := StrSplit(questions, ";")
+	splitAnswers := StrSplit(answers, ";")
+	
+	For questionKey, questionVal in splitQuestions
+		Hotkey, NUMPAD . %questionKey%, SendChat(questionVal)
+	
+	For answerKey, answerVal in splitAnswers
+		Hotkey, !NUMPAD . %answerKey%, SendChat(answerVal)
+	
+	newsText := Event.GetEventNewsText(Array("Runden" => rounds))
+	
+	if (!newsText.Equals(""))
+		Hotkey, !s, %newsText%
+}
 
 CheckRounds(rounds)
 {
