@@ -3,11 +3,11 @@
 ; SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 ; SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
-;#IfWinActive, GTA:SA:MP
+#IfWinActive, GTA:SA:MP
 #UseHook
 #Include inc\API.ahk
 #Include inc\Config.ahk
-#Include inc\Event.ahk
+#Include inc\SanaEvent.ahk
 ;#Include inc\Test.ahk
 
 ; Initialisierung
@@ -48,7 +48,7 @@ return
 
 ; Prints InGame key help as chatlog
 :?:/keyhelp::
-	SendMultipleLines(Array("Alt+e - Liste mit Events.", "Alt+0 - Glückwunsch-Text bei Events.", "/frc - Alle Fahrzeuge werden respawnt.", "/nadn - Werbung für SANA, um neue Mitglieder zu bekommen.", "/naddon - Werbung für Spenden.", "/gr - Gruß-Runde wird eingeleitet.", "/gre - Gruß-Runde wird beendet.", "/thx - Bedanken für die Teilnahme.", "/winners - Aufforderung alle Gewinner zur SANA-Base zu kommen.", "/countdown - Ein Countdown wird gestartet.", "F12 - Keybinder aktivieren/deaktivieren."), true)
+	SendMultipleLines(Array("Alt+e - Liste mit Events.", "Alt+a - Festgelegte Events auswählen.", "Alt+s - Event ausführen (Einleitungstext wird abgesendet).", "Numpad0-9 - Festgelegte Fragen absenden.", "Alt+Numpad0-9 - Festgelegte Antworten absenden.", "Alt+0 - Glückwunsch-Text bei Events.", "Alt+d - Bedanken für die Spende an die SANA.", "/frc - Alle Fahrzeuge werden respawnt.", "/nadn - Werbung für SANA, um neue Mitglieder zu bekommen.", "/naddon - Werbung für Spenden.", "/gr - Gruß-Runde wird eingeleitet.", "/gre - Gruß-Runde wird beendet.", "/thx - Bedanken für die Teilnahme.", "/winners - Aufforderung alle Gewinner zur SANA-Base zu kommen.", "/countdown - Ein Countdown wird gestartet.", "F12 - Keybinder aktivieren/deaktivieren."), true)
 return
 
 ; Keybinds
@@ -196,7 +196,7 @@ OnDialogResponse(response)
 				OpenDialog(0, "{FFFFFF}Soll das Event wirklich gestartet werden?`n`nMit der Taste {C1F10E}Alt+S{FFFFFF} wird die News-Nachricht abgesendet.`n`nDie festgelegten Fragen sind über {C1F10E}Numpad0-9{FFFFFF} und die Antworten`nüber {C1F10E}Alt+Numpad0-9{FFFFFF} reserviert.", 4100)
 			return
 			
-			Case-4100:
+			Case-4101:
 				SetEventKeyBinds(GetDialogLines__()[index])
 			return
 					
@@ -224,26 +224,52 @@ return
 SetEventKeyBinds(eventSection)
 {
 	eventSavePath := Config.EventsSavePath
+	questionKey := "Frage"
+	answerKey := "Antwort"
+	roundsKey := "Runden"
+	eventHotkey := ""
 	
 	; read events.ini
-	IniRead, questions, %eventSavePath%, %eventSection%, "Frage"
-	IniRead, answers, %eventSavePath%, %eventSection%, "Antwort"
-	IniRead, rounds, %eventSavePath%, %eventSection%, "Runden"
+	IniRead, questions, %eventSavePath%, %eventSection%, %questionKey%
+	IniRead, answers, %eventSavePath%, %eventSection%, %answerKey%
+	IniRead, rounds, %eventSavePath%, %eventSection%, %roundsKey%
 	
 	splitQuestions := StrSplit(questions, ";")
 	splitAnswers := StrSplit(answers, ";")
 	
+	global ev := new SanaEvent()
+	
 	For questionKey, questionVal in splitQuestions
-		Hotkey, NUMPAD . %questionKey%, SendChat(questionVal)
+	{
+		eventHotkey = Numpad%questionKey%
+		ev.SetEventRounds(questionKey)
+		ev.SetQuestionName(questionVal)
+		Hotkey, %eventHotkey%, AddQuestionKey
+	}
 	
 	For answerKey, answerVal in splitAnswers
-		Hotkey, !NUMPAD . %answerKey%, SendChat(answerVal)
+	{
+		eventHotkey = !Numpad%questionKey%
+		Hotkey, %eventHotkey%, AddAnswerKey
+	}
 	
-	newsText := Event.GetEventNewsText(Array("Runden" => rounds))
+	newsText := ev.GetEventNewsText(Array("Runden" => rounds))
 	
 	if (!newsText.Equals(""))
-		Hotkey, !s, %newsText%
+		Hotkey, !s, AddNewsText
 }
+
+AddQuestionKey:
+	SendChat(ev.GetEventRounds())
+return
+
+AddAnswerKey:
+	SendChat("Test2")
+return
+
+AddNewsText:
+	SendChat(newsText)
+return
 
 CheckRounds(rounds)
 {
@@ -296,12 +322,12 @@ return
 
 ; Ad for new sana members
 :?:/nadn::
-	SendNewsMessage(Array("SA:NA Bewerbungsrunde [OPEN]", "Die San Andreas News Agency sucht motivierte Reporter!", "Du wolltest schon immer Berichte schreiben und kleinere Events leiten?", "Dann bewirb dich noch heute bei der SA:NA!"))
+	SendNewsMessage(Array("SA:NA Bewerbungsrunde [OPEN]", "Die San Andreas News Agency sucht motivierte Reporter{!}", "Du wolltest schon immer Berichte schreiben und kleinere Events leiten?", "Dann bewirb dich noch heute bei der SA:NA{!}"))
 return
 
 ; Ad for donations
 :?:/naddon::
-	SendNewsMessage(Array("SA:NA - Spendenaktion", "Die San Andreas News Agency benötigt eure Spenden!", "Mit eurer Hilfe könnt ihr dazu beitragen, unsere Events aktiver und spannender zu gestalten.", "Jede eingegangene Spende wird im News-Chat erwähnt."))
+	SendNewsMessage(Array("SA:NA - Spendenaktion", "Die San Andreas News Agency benötigt eure Spenden{!}", "Mit eurer Hilfe könnt ihr dazu beitragen, unsere Events aktiver und spannender zu gestalten.", "Jede eingegangene Spende wird im News-Chat erwähnt."))
 return
 
 ; Start greet round
@@ -328,6 +354,13 @@ return
 
 :?:/thx::
 	SendNewsMessage("Vielen Dank für die Teilnahme!")
+return
+
+; donations
+#If !IsInChat()
+!d::
+	donationText := "/news .:: Vielen Dank{Space}{Space}für die großzügige Spende{!} ::."
+	SendInput t%donationText%
 return
 
 ; Automatic vehicle engine and light start
