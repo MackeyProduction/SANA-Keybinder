@@ -12,7 +12,7 @@
 	
 	GetEventNewsText(eventArray)
 	{
-		newsArray := ["SAN:NEWS - Wortsalat", format("{0} Runden", eventArray["Runden"]), format("Für jede richtige Lösung gibt es eine Gewinnsumme von {0}!", 50000), format("Schick mir die richtige Antwort per SMS an die ID {0}!", GetPlayerId())]
+		newsArray := Array(format("SAN:NEWS - {1}", eventArray["eventName"]), format("{1} Runde/n", eventArray["Runden"]), format("Für jede richtige Lösung gibt es eine Gewinnsumme von {1}$!", 50000), format("Schick mir die richtige Antwort per SMS an die ID {1}!", GetPlayerId()))
 		
 		return newsArray
 	}
