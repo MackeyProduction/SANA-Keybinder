@@ -1,0 +1,56 @@
+﻿!x::
+	;TestSaveEvents()
+	TestEventHotkeys()
+Return
+
+TestSaveEvents()
+{
+	eventArray := []
+	eventArray["eventName"] := "Quiz-Runde"
+	eventArray["Frage"] := "foo;a;b;c;d"
+	eventArray["Antwort"] := "bar;c;d;e;f"
+	eventArray["Runden"] := "5"
+	Config.SaveTempEvent("eventName", eventArray["eventName"])
+	Config.SaveTempEvent("Frage", eventArray["Frage"])
+	Config.SaveTempEvent("Antwort", eventArray["Antwort"])
+	Config.SaveTempEvent("Runden", eventArray["Runden"])
+	
+	result := Config.ParseTempEvents(4)
+	
+	Config.SaveEvents(result)
+}
+
+TestEventHotkeys()
+{
+	global evtObjectArray := []
+	global ev := new SanaEvent()
+	
+	; set event rounds
+	ev.SetEventRounds(rounds)
+	
+	For questionKey, questionVal in splitQuestions
+	{
+		eventHotkey = Numpad%questionKey%
+		ev.SetQuestionName(questionVal)
+		evtObjectArray["Frage"][questionKey] := ev
+		Hotkey, %eventHotkey%, TestAddQuestionKey
+	}
+	
+	For answerKey, answerVal in splitAnswers
+	{
+		eventHotkey = !Numpad%questionKey%
+		ev.SetAnswerName(answerVal)
+		evtObjectArray["Antwort"][answerKey] := ev
+		Hotkey, %eventHotkey%, TestAddAnswerKey
+	}
+}
+
+TestAddQuestionKey:
+	foo := evtObjectArray["Frage"][1]
+	SendInput %foo%
+	;SendChat(evtObjectArray["Frage"][1].GetQuestionName())
+return
+
+TestAddAnswerKey:
+	;SendChat("Test2")
+return

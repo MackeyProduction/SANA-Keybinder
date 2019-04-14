@@ -1,5 +1,6 @@
 ﻿!x::
-	TestSaveEvents()
+	;TestSaveEvents()
+	TestEventHotkeys()
 Return
 
 TestSaveEvents()
@@ -18,3 +19,38 @@ TestSaveEvents()
 	
 	Config.SaveEvents(result)
 }
+
+TestEventHotkeys()
+{
+	global evtObjectArray := []
+	global ev := new SanaEvent()
+	
+	; set event rounds
+	ev.SetEventRounds(rounds)
+	
+	For questionKey, questionVal in splitQuestions
+	{
+		eventHotkey = Numpad%questionKey%
+		ev.SetQuestionName(questionVal)
+		evtObjectArray["Frage"][questionKey] := ev
+		Hotkey, %eventHotkey%, TestAddQuestionKey
+	}
+	
+	For answerKey, answerVal in splitAnswers
+	{
+		eventHotkey = !Numpad%questionKey%
+		ev.SetAnswerName(answerVal)
+		evtObjectArray["Antwort"][answerKey] := ev
+		Hotkey, %eventHotkey%, TestAddAnswerKey
+	}
+}
+
+TestAddQuestionKey:
+	foo := evtObjectArray["Frage"][1]
+	SendInput Hallo
+	;SendChat(evtObjectArray["Frage"][1].GetQuestionName())
+return
+
+TestAddAnswerKey:
+	;SendChat("Test2")
+return

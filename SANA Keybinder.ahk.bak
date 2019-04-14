@@ -90,6 +90,12 @@ OnDialogResponse(response)
 			
 			Case := GetDialogId() + index
 			
+			if (Case > 4000 && Case < 4100)
+				OpenDialog(0, "{FFFFFF}Soll das Event wirklich gestartet werden?`n`nMit der Taste {C1F10E}Alt+S{FFFFFF} wird die News-Nachricht abgesendet.`n`nDie festgelegten Fragen sind über {C1F10E}Numpad1{FFFFFF} und die Antworten`nüber {C1F10E}Numpad2{FFFFFF} reserviert.", 4100)
+			
+			if (Case > 4100)
+				SetEventKeyBinds(GetDialogLines__()[index])
+			
 			GoTo % IsLabel("Case-" Case) ? "Case-" Case : "Case-Default"
 				
 			Case-1001:
@@ -156,24 +162,13 @@ OnDialogResponse(response)
 				; save in temp file
 				Config.SaveTempEvent(questionAnswerType, eventArray[questionAnswerType])
 				
-				; parse temp file in readable array
-				result := Config.ParseTempEvents(4)
-				
-				; save data in events.ini
-				Config.SaveEvents(result)
-				AddChatMessage("{C1F10E}Alle Eingaben wurden erfolgreich gespeichert!")
+				; save in ini file
+				SaveChanges(4)
 				break
 			return
 			
 			Case-2103:
-				OpenDialog(1, "Wie viele Runden sollen gespielt werden?", 2103)
-				Input, rounds, V, {enter}
-				
-				if (CheckRounds(rounds))
-				{
-					Config.SaveTempEvent("Runden", rounds)
-					AddChatMessage("{C1F10E}Die Rundenanzahl wurde erfolgreich gespeichert!")
-				}
+				AddRounds()
 			return
 			
 			Case-3001:
@@ -183,21 +178,13 @@ OnDialogResponse(response)
 			Case-3005:
 			Case-3006:
 			Case-3007:
-				Event.EventName := GetDialogLines__()[index]
+				Config.SaveTempEvent("eventName", GetDialogLines__()[index])
 				OpenDialog(2, "Runden festlegen", 3100)
 			return
 			
 			Case-3101:
-				goto Case-2103
-			return
-			
-			Case-4001:
-			Case-4002:
-				OpenDialog(0, "{FFFFFF}Soll das Event wirklich gestartet werden?`n`nMit der Taste {C1F10E}Alt+S{FFFFFF} wird die News-Nachricht abgesendet.`n`nDie festgelegten Fragen sind über {C1F10E}Numpad0-9{FFFFFF} und die Antworten`nüber {C1F10E}Alt+Numpad0-9{FFFFFF} reserviert.", 4100)
-			return
-			
-			Case-4101:
-				SetEventKeyBinds(GetDialogLines__()[index])
+				AddRounds()
+				SaveChanges(2)
 			return
 					
 			Case-Default:
@@ -221,13 +208,40 @@ return
 	OpenDialog(2, events, 4000)
 return
 
+AddRounds()
+{
+	OpenDialog(1, "Wie viele Runden sollen gespielt werden?", 2103)
+	Input, rounds, V, {enter}
+	
+	if (CheckRounds(rounds))
+	{
+		Config.SaveTempEvent("Runden", rounds)
+		AddChatMessage("{C1F10E}Die Rundenanzahl wurde erfolgreich gespeichert!")
+	}
+}
+
+SaveChanges(rows)
+{
+	; parse temp file in readable array
+	result := Config.ParseTempEvents(rows)
+		
+	; save data in events.ini
+	Config.SaveEvents(result)
+	AddChatMessage("{C1F10E}Alle Eingaben wurden erfolgreich gespeichert!")
+}
+
 SetEventKeyBinds(eventSection)
 {
+	global questionCounter := 1
+	global answerCounter := 1
+	global questionArray := []
+	global answerArray := []
+	global ev := new SanaEvent()
+	
 	eventSavePath := Config.EventsSavePath
 	questionKey := "Frage"
 	answerKey := "Antwort"
 	roundsKey := "Runden"
-	eventHotkey := ""
 	
 	; read events.ini
 	IniRead, questions, %eventSavePath%, %eventSection%, %questionKey%
@@ -237,38 +251,43 @@ SetEventKeyBinds(eventSection)
 	splitQuestions := StrSplit(questions, ";")
 	splitAnswers := StrSplit(answers, ";")
 	
-	global ev := new SanaEvent()
+	; set event rounds
+	ev.SetEventRounds(rounds)
 	
 	For questionKey, questionVal in splitQuestions
 	{
-		eventHotkey = Numpad%questionKey%
-		ev.SetEventRounds(questionKey)
-		ev.SetQuestionName(questionVal)
-		Hotkey, %eventHotkey%, AddQuestionKey
+		questionArray[questionKey] := questionVal
+		Hotkey, Numpad1, AddQuestionKey
 	}
 	
 	For answerKey, answerVal in splitAnswers
 	{
-		eventHotkey = !Numpad%questionKey%
-		Hotkey, %eventHotkey%, AddAnswerKey
+		answerArray[answerKey] := answerVal
+		Hotkey, Numpad2, AddAnswerKey
 	}
 	
-	newsText := ev.GetEventNewsText(Array("Runden" => rounds))
+	global newsText := ev.GetEventNewsText({"eventName": eventSection, "Runden": rounds})
 	
-	if (!newsText.Equals(""))
+	if (newsText.Count() > 0)
 		Hotkey, !s, AddNewsText
 }
 
 AddQuestionKey:
-	SendChat(ev.GetEventRounds())
+	if (questionCounter < questionArray.Count()) {
+		SendNewsMessage(questionCounter . ". Frage: " . questionArray[questionCounter])
+		questionCounter++
+	}
 return
 
 AddAnswerKey:
-	SendChat("Test2")
+	if (answerCounter < answerArray.Count()) {
+		SendNewsMessage("Die richtige Antwort lautet: " . answerArray[answerCounter])
+		answerCounter++
+	}
 return
 
 AddNewsText:
-	SendChat(newsText)
+	SendNewsMessage(newsText)
 return
 
 CheckRounds(rounds)
@@ -322,7 +341,7 @@ return
 
 ; Ad for new sana members
 :?:/nadn::
-	SendNewsMessage(Array("SA:NA Bewerbungsrunde [OPEN]", "Die San Andreas News Agency sucht motivierte Reporter{!}", "Du wolltest schon immer Berichte schreiben und kleinere Events leiten?", "Dann bewirb dich noch heute bei der SA:NA{!}"))
+	SendNewsMessage(Array("SA:NA Bewerbungsrunde [OPEN]", "Die San Andreas News Agency sucht motivierte Reporter!", "Du wolltest schon immer Berichte schreiben und kleinere Events leiten?", "Dann bewirb dich noch heute bei der SA:NA!"))
 return
 
 ; Ad for donations
@@ -340,13 +359,6 @@ return
 	SendNewsMessage(Array("Vielen Dank für eure Teilnahme!", "SA:NA - Gruß-Box Ende"))
 return
 
-; Gratulation text
-#If !IsInChat()
-!0::
-	hgwText := "/news .:: Herzlichen Glückwunsch an{Space} ::."
-	SendInput t%hgwText%
-return
-
 ; winners to SA:NA Base text
 :?:/winners::
 	SendNewsMessage("Ich bitte jeden Gewinner zur SA:NA Base zu kommen!")
@@ -354,6 +366,13 @@ return
 
 :?:/thx::
 	SendNewsMessage("Vielen Dank für die Teilnahme!")
+return
+
+; Gratulation text
+#If !IsInChat()
+!0::
+	hgwText := "/news .:: Herzlichen Glückwunsch an{Space} ::."
+	SendInput t%hgwText%
 return
 
 ; donations
@@ -394,7 +413,7 @@ return
 ; Send news message in news notation
 SendNewsMessage(newsMessage)
 {
-	if (!newsMessage.Equals("") && newsMessage.Count() > 0)
+	if (!newsMessage.Equals("") && newsMessage.Count() > 1)
 	{
 		newsArray := []
 		
@@ -421,7 +440,7 @@ SendMultipleLines(messageArray, isChatMessage = false)
 			else
 				SendChat(val)
 			
-			Sleep, 200
+			Sleep, 350
 		}
 	}
 	
